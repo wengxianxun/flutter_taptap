@@ -17,6 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  String _loginResult = '';
   final _flutterTaptapPlugin = FlutterTaptap();
 
   @override
@@ -32,8 +33,8 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       _flutterTaptapPlugin.init(
-        clientId: "clientId",
-        clientToken: "clientToken",
+        clientId: "rzdzhht8quqietjakk",
+        clientToken: "lHgdgRrR7AvirdOSQfSb1ddJ9HYwgt8qKSf9uWuo",
       );
       platformVersion =
           await _flutterTaptapPlugin.getPlatformVersion() ??
@@ -52,12 +53,45 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _login() async {
+    try {
+      final result = await _flutterTaptapPlugin.login(scopes: ['public_profile']);
+      if (result != null) {
+        setState(() {
+          _loginResult = '登录成功!\nopenId: ${result['openId']}\nunionId: ${result['unionId']}';
+        });
+      } else {
+        setState(() {
+          _loginResult = '用户取消登录';
+        });
+      }
+    } on PlatformException catch (e) {
+      setState(() {
+        _loginResult = '登录失败: ${e.message}';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Plugin example app')),
-        body: Center(child: Text('Running on: $_platformVersion\n')),
+        appBar: AppBar(title: const Text('TapTap登录插件示例')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Running on: $_platformVersion\n'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _login,
+                child: const Text('TapTap登录'),
+              ),
+              const SizedBox(height: 20),
+              Text(_loginResult),
+            ],
+          ),
+        ),
       ),
     );
   }

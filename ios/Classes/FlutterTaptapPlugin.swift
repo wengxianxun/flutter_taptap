@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import TapTapCoreSDK
+import TapTapLoginSDK
 
 public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -36,6 +37,54 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
       
       TapTapSdk.initSDK(with: options)
       result(nil)
+    case "login":
+      guard let args = call.arguments as? [String: Any] else {
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      let scopes = args["scopes"] as? [String] ?? ["public_profile"]
+      let tapScopes = scopes.map { scope -> TapTapScope in
+        switch scope {
+        case "public_profile":
+          return .publicProfile
+        default:
+          return .publicProfile
+        }
+      }
+      
+      guard let viewController = UIApplication.shared.keyWindow?.rootViewController else {
+        result(FlutterError(code: "VIEW_CONTROLLER_NOT_AVAILABLE", message: "View controller is not available", details: nil))
+        return
+      }
+      
+      TapTapLogin.login(with: viewController, permissions: tapScopes) { account, error in
+        if let error = error {
+          let errorCode = (error as NSError).code
+          result(FlutterError(code: "LOGIN_FAILED", message: error.localizedDescription, details: errorCode))
+          return
+        }
+        
+        if let account = account {
+          let accountInfo: [String: Any] = [
+            "openId": account.userId ?? "",
+            "unionId": account.unionId ?? ""
+          ]
+          result(accountInfo)
+        } else {
+          result(nil)
+        }
+      }
+    case "getCurrentUser":
+      if let account = TapTapLogin.currentTapAccount() {
+        let accountInfo: [String: Any] = [
+          "openId": account.userId ?? "",
+          "unionId": account.unionId ?? ""
+        ]
+        result(accountInfo)
+      } else {
+        result(nil)
+      }
     default:
       result(FlutterMethodNotImplemented)
     }

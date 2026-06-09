@@ -22,4 +22,14 @@ class FlutterTaptap {
       enableLog: enableLog,
     );
   }
+
+  Future<Map<String, dynamic>?> login({
+    List<String> scopes = const ['public_profile'],
+  }) {
+    return FlutterTaptapPlatform.instance.login(scopes: scopes);
+  }
+
+  Future<Map<String, dynamic>?> getCurrentUser() {
+    return FlutterTaptapPlatform.instance.getCurrentUser();
+  }
 }

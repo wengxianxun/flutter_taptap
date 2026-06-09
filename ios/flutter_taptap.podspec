@@ -16,6 +16,7 @@ taptap服务插件
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.dependency 'TapTapCoreSDK'
+  s.dependency 'TapTapLoginSDK'
   s.platform = :ios, '13.0'
 
   # Flutter.framework does not contain a i386 slice.

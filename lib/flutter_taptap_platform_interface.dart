@@ -31,4 +31,14 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
   }) {
     throw UnimplementedError('init() has not been implemented.');
   }
+
+  Future<Map<String, dynamic>?> login({
+    List<String> scopes = const ['public_profile'],
+  }) {
+    throw UnimplementedError('login() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>?> getCurrentUser() {
+    throw UnimplementedError('getCurrentUser() has not been implemented.');
+  }
 }
