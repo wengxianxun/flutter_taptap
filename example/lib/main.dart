@@ -18,6 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   String _loginResult = '';
+  String _userStatus = '';
   final _flutterTaptapPlugin = FlutterTaptap();
 
   @override
@@ -72,6 +73,21 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _checkLoginStatus() async {
+    final user = await _flutterTaptapPlugin.getCurrentUser();
+    if (user != null) {
+      setState(() {
+        _userStatus = '已登录\nopenId: ${user['openId']}\nunionId: ${user['unionId']}';
+      });
+      print('已登录 - openId: ${user['openId']}, unionId: ${user['unionId']}');
+    } else {
+      setState(() {
+        _userStatus = '未登录';
+      });
+      print('未登录');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -87,8 +103,15 @@ class _MyAppState extends State<MyApp> {
                 onPressed: _login,
                 child: const Text('TapTap登录'),
               ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: _checkLoginStatus,
+                child: const Text('检查登录状态'),
+              ),
               const SizedBox(height: 20),
               Text(_loginResult),
+              const SizedBox(height: 20),
+              Text(_userStatus),
             ],
           ),
         ),
