@@ -1,7 +1,10 @@
 name: flutter_taptap
-description: "taptap服务插件"
+description: "TapTap SDK Flutter 插件，提供登录、排行榜等功能"
 version: 0.0.1
-homepage:
+homepage: https://github.com/yourusername/flutter_taptap
+repository: https://github.com/yourusername/flutter_taptap
+issue_tracker: https://github.com/yourusername/flutter_taptap/issues
+documentation: https://github.com/yourusername/flutter_taptap/blob/main/README.md
 
 environment:
   sdk: ^3.11.5

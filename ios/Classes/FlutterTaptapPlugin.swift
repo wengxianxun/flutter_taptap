@@ -89,6 +89,9 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
       } else {
         result(nil)
       }
+    case "logout":
+      TapTapLogin.logout()
+      result(nil)
     case "openLeaderboard":
       guard let args = call.arguments as? [String: Any] else {
         result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))

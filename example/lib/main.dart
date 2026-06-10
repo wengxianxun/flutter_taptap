@@ -20,7 +20,6 @@ class _MyAppState extends State<MyApp> {
   String _loginResult = '';
   String _userStatus = '';
   String _leaderboardStatus = '';
-  final _flutterTaptapPlugin = FlutterTaptap();
 
   @override
   void initState() {
@@ -34,13 +33,13 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      _flutterTaptapPlugin.init(
+      FlutterTaptap().init(
         clientId: "rzdzhht8quqietjakk",
         clientToken: "lHgdgRrR7AvirdOSQfSb1ddJ9HYwgt8qKSf9uWuo",
         screenOrientation: 0,
       );
       platformVersion =
-          await _flutterTaptapPlugin.getPlatformVersion() ??
+          await FlutterTaptap().getPlatformVersion() ??
           'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
@@ -56,7 +55,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _login() async {
     try {
-      final result = await _flutterTaptapPlugin.login(
+      final result = await FlutterTaptap().login(
         scopes: ['public_profile'],
       );
       if (result != null) {
@@ -76,8 +75,23 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _logout() async {
+    try {
+      await FlutterTaptap().logout();
+      setState(() {
+        _loginResult = '已登出';
+        _userStatus = '';
+      });
+      print('登出成功');
+    } on PlatformException catch (e) {
+      setState(() {
+        _loginResult = '登出失败: ${e.message}';
+      });
+    }
+  }
+
   Future<void> _checkLoginStatus() async {
-    final user = await _flutterTaptapPlugin.getCurrentUser();
+    final user = await FlutterTaptap().getCurrentUser();
     if (user != null) {
       setState(() {
         _userStatus =
@@ -94,7 +108,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _registerLeaderboardCallback() async {
     try {
-      await _flutterTaptapPlugin.registerLeaderboardCallback(
+      await FlutterTaptap().registerLeaderboardCallback(
         onResult: (event) {
           final code = event['code'] as int;
           final message = event['message'] as String;
@@ -124,7 +138,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _unregisterLeaderboardCallback() async {
     try {
-      await _flutterTaptapPlugin.unregisterLeaderboardCallback();
+      await FlutterTaptap().unregisterLeaderboardCallback();
       setState(() {
         _leaderboardStatus = '排行榜回调已取消注册';
       });
@@ -137,7 +151,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _setLeaderboardShareCallback() async {
     try {
-      await _flutterTaptapPlugin.setLeaderboardShareCallback();
+      await FlutterTaptap().setLeaderboardShareCallback();
       setState(() {
         _leaderboardStatus = '分享回调已设置';
       });
@@ -150,7 +164,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _openLeaderboard(String type) async {
     try {
-      await _flutterTaptapPlugin.openLeaderboard(
+      await FlutterTaptap().openLeaderboard(
         leaderboardId: 'xab1tc1s7am9vp9wxb',
         type: type,
       );
@@ -167,7 +181,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _submitScores() async {
     try {
       // 先获取当前登录用户信息
-      final user = await _flutterTaptapPlugin.getCurrentUser();
+      final user = await FlutterTaptap().getCurrentUser();
       if (user == null) {
         setState(() {
           _leaderboardStatus = '请先登录';
@@ -180,7 +194,7 @@ class _MyAppState extends State<MyApp> {
         {'leaderboardId': 'xab1tc1s7am9vp9wxb', 'score': 7000},
       ];
 
-      final result = await _flutterTaptapPlugin.submitScores(scores);
+      final result = await FlutterTaptap().submitScores(scores);
       if (result['success'] == true) {
         setState(() {
           _leaderboardStatus = '分数提交成功!';
@@ -211,6 +225,11 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: _login,
                   child: const Text('TapTap登录'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _logout,
+                  child: const Text('登出'),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(

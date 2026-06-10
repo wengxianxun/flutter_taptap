@@ -62,6 +62,11 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
   }
 
   @override
+  Future<void> logout() async {
+    await methodChannel.invokeMethod<void>('logout');
+  }
+
+  @override
   Future<void> openLeaderboard({
     required String leaderboardId,
     String type = 'public',

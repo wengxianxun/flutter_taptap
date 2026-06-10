@@ -122,6 +122,10 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     result.success(null)
                 }
             }
+            "logout" -> {
+                TapTapLogin.logout()
+                result.success(null)
+            }
             "openLeaderboard" -> {
                 val leaderboardId = call.argument<String>("leaderboardId") ?: ""
                 val type = call.argument<String>("type") ?: "public"

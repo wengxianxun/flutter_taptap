@@ -42,6 +42,10 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
     throw UnimplementedError('getCurrentUser() has not been implemented.');
   }
 
+  Future<void> logout() {
+    throw UnimplementedError('logout() has not been implemented.');
+  }
+
   Future<void> openLeaderboard({
     required String leaderboardId,
     String type = 'public',
