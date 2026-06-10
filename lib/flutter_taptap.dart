@@ -32,4 +32,34 @@ class FlutterTaptap {
   Future<Map<String, dynamic>?> getCurrentUser() {
     return FlutterTaptapPlatform.instance.getCurrentUser();
   }
+
+  Future<void> openLeaderboard({
+    required String leaderboardId,
+    String type = 'public',
+  }) {
+    return FlutterTaptapPlatform.instance.openLeaderboard(
+      leaderboardId: leaderboardId,
+      type: type,
+    );
+  }
+
+  Future<void> registerLeaderboardCallback({
+    required Function(Map<String, dynamic>) onResult,
+  }) {
+    return FlutterTaptapPlatform.instance.registerLeaderboardCallback(
+      onResult: onResult,
+    );
+  }
+
+  Future<void> unregisterLeaderboardCallback() {
+    return FlutterTaptapPlatform.instance.unregisterLeaderboardCallback();
+  }
+
+  Future<void> setLeaderboardShareCallback() {
+    return FlutterTaptapPlatform.instance.setLeaderboardShareCallback();
+  }
+
+  Future<Map<String, dynamic>> submitScores(List<Map<String, dynamic>> scores) {
+    return FlutterTaptapPlatform.instance.submitScores(scores);
+  }
 }

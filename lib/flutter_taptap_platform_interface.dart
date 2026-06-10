@@ -41,4 +41,29 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
   Future<Map<String, dynamic>?> getCurrentUser() {
     throw UnimplementedError('getCurrentUser() has not been implemented.');
   }
+
+  Future<void> openLeaderboard({
+    required String leaderboardId,
+    String type = 'public',
+  }) {
+    throw UnimplementedError('openLeaderboard() has not been implemented.');
+  }
+
+  Future<void> registerLeaderboardCallback({
+    required Function(Map<String, dynamic>) onResult,
+  }) {
+    throw UnimplementedError('registerLeaderboardCallback() has not been implemented.');
+  }
+
+  Future<void> unregisterLeaderboardCallback() {
+    throw UnimplementedError('unregisterLeaderboardCallback() has not been implemented.');
+  }
+
+  Future<void> setLeaderboardShareCallback() {
+    throw UnimplementedError('setLeaderboardShareCallback() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> submitScores(List<Map<String, dynamic>> scores) {
+    throw UnimplementedError('submitScores() has not been implemented.');
+  }
 }
