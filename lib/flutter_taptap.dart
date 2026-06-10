@@ -3,6 +3,16 @@ export 'flutter_taptap_platform_interface.dart' show TapTapRegion;
 import 'flutter_taptap_platform_interface.dart';
 
 class FlutterTaptap {
+
+  // 单例实例
+  static final FlutterTaptap _instance = FlutterTaptap._internal();
+  
+  // 工厂构造函数，返回单例实例
+  factory FlutterTaptap() => _instance;
+  
+  // 私有构造函数
+  FlutterTaptap._internal();
+
   Future<String?> getPlatformVersion() {
     return FlutterTaptapPlatform.instance.getPlatformVersion();
   }
