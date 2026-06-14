@@ -1,4 +1,4 @@
-export 'flutter_taptap_platform_interface.dart' show TapTapRegion;
+export 'flutter_taptap_platform_interface.dart' show TapTapRegion, TapTapUser;
 
 import 'flutter_taptap_platform_interface.dart';
 
@@ -44,9 +44,15 @@ class FlutterTaptap {
   /// TapTap 登录
   /// 
   /// [scopes] 权限作用域列表，默认为 ['public_profile']
-  /// 返回用户信息 Map，包含 openId 和 unionId
+  /// 返回 [TapTapUser] 用户信息，包含以下字段：
+  /// - openId: 用户在当前应用中的唯一标识，每个玩家在每个游戏中的 openId 都不一样
+  /// - unionId: 用户在同一厂商所有应用中的唯一标识，一个玩家在同一个厂商的所有游戏中 unionId 是一样的
+  /// - name: 玩家在 TapTap 平台的昵称
+  /// - avatar: 玩家在 TapTap 平台的头像 url
+  /// - accessToken: 玩家在 TapTap 平台的用户 token 信息
+  /// 
   /// 用户取消登录返回 null
-  Future<Map<String, dynamic>?> login({
+  Future<TapTapUser?> login({
     List<String> scopes = const ['public_profile'],
   }) {
     return FlutterTaptapPlatform.instance.login(scopes: scopes);
@@ -54,9 +60,15 @@ class FlutterTaptap {
 
   /// 获取当前登录用户信息
   /// 
-  /// 返回用户信息 Map，包含 openId 和 unionId
+  /// 返回 [TapTapUser] 用户信息，包含以下字段：
+  /// - openId: 用户在当前应用中的唯一标识，每个玩家在每个游戏中的 openId 都不一样
+  /// - unionId: 用户在同一厂商所有应用中的唯一标识，一个玩家在同一个厂商的所有游戏中 unionId 是一样的
+  /// - name: 玩家在 TapTap 平台的昵称
+  /// - avatar: 玩家在 TapTap 平台的头像 url
+  /// - accessToken: 玩家在 TapTap 平台的用户 token 信息
+  /// 
   /// 未登录返回 null
-  Future<Map<String, dynamic>?> getCurrentUser() {
+  Future<TapTapUser?> getCurrentUser() {
     return FlutterTaptapPlatform.instance.getCurrentUser();
   }
 

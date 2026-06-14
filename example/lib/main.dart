@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
       if (result != null) {
         setState(() {
           _loginResult =
-              '登录成功!\nopenId: ${result['openId']}\nunionId: ${result['unionId']}';
+              '登录成功!\nopenId: ${result.openId}\nunionId: ${result.unionId}';
         });
       } else {
         setState(() {
@@ -94,10 +94,14 @@ class _MyAppState extends State<MyApp> {
     final user = await FlutterTaptap().getCurrentUser();
     if (user != null) {
       setState(() {
-        _userStatus =
-            '已登录\nopenId: ${user['openId']}\nunionId: ${user['unionId']}';
+        _userStatus = '已登录\n'
+            'openId: ${user.openId}\n'
+            'unionId: ${user.unionId}\n'
+            'name: ${user.name}\n'
+            'avatar: ${user.avatar}\n'
+            'accessToken: ${user.accessToken}';
       });
-      print('已登录 - openId: ${user['openId']}, unionId: ${user['unionId']}');
+      print('已登录 - openId: ${user.openId}, unionId: ${user.unionId}');
     } else {
       setState(() {
         _userStatus = '未登录';

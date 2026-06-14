@@ -93,9 +93,14 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     scopes,
                     object : TapTapCallback<TapTapAccount> {
                         override fun onSuccess(account: TapTapAccount) {
+                            // AccessToken 是对象，需要转为字符串
+                            val tokenStr = account.accessToken?.toString() ?: ""
                             val accountMap = mapOf(
                                 "openId" to account.openId,
-                                "unionId" to account.unionId
+                                "unionId" to account.unionId,
+                                "name" to (account.name ?: ""),
+                                "avatar" to (account.avatar ?: ""),
+                                "accessToken" to tokenStr
                             )
                             result.success(accountMap)
                         }
@@ -113,9 +118,14 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "getCurrentUser" -> {
                 val account = TapTapLogin.getCurrentTapAccount()
                 if (account != null) {
+                    // AccessToken 是对象，需要转为字符串
+                    val tokenStr = account.accessToken?.toString() ?: ""
                     val accountMap = mapOf(
                         "openId" to account.openId,
-                        "unionId" to account.unionId
+                        "unionId" to account.unionId,
+                        "name" to (account.name ?: ""),
+                        "avatar" to (account.avatar ?: ""),
+                        "accessToken" to tokenStr
                     )
                     result.success(accountMap)
                 } else {

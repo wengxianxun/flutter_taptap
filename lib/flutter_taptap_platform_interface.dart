@@ -1,6 +1,9 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'flutter_taptap_method_channel.dart';
+import 'flutter_taptap_user.dart';
+
+export 'flutter_taptap_user.dart';
 
 enum TapTapRegion { cn, global }
 
@@ -32,13 +35,13 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
     throw UnimplementedError('init() has not been implemented.');
   }
 
-  Future<Map<String, dynamic>?> login({
+  Future<TapTapUser?> login({
     List<String> scopes = const ['public_profile'],
   }) {
     throw UnimplementedError('login() has not been implemented.');
   }
 
-  Future<Map<String, dynamic>?> getCurrentUser() {
+  Future<TapTapUser?> getCurrentUser() {
     throw UnimplementedError('getCurrentUser() has not been implemented.');
   }
 

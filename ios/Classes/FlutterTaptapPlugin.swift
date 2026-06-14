@@ -72,7 +72,10 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
         if let account = account {
           let accountInfo: [String: Any] = [
             "openId": account.userId ?? "",
-            "unionId": account.unionId ?? ""
+            "unionId": account.unionId ?? "",
+            "name": account.name ?? "",
+            "avatar": account.avatarUrl ?? "",
+            "accessToken": account.accessToken ?? ""
           ]
           result(accountInfo)
         } else {
@@ -83,7 +86,10 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
       if let account = TapTapLogin.currentTapAccount() {
         let accountInfo: [String: Any] = [
           "openId": account.userId ?? "",
-          "unionId": account.unionId ?? ""
+          "unionId": account.unionId ?? "",
+          "name": account.name ?? "",
+          "avatar": account.avatarUrl ?? "",
+          "accessToken": account.accessToken ?? ""
         ]
         result(accountInfo)
       } else {

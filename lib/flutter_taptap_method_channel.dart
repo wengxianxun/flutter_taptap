@@ -43,22 +43,24 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
   }
 
   @override
-  Future<Map<String, dynamic>?> login({
+  Future<TapTapUser?> login({
     List<String> scopes = const ['public_profile'],
   }) async {
     final result = await methodChannel.invokeMethod<Map<Object?, Object?>>(
       'login',
       {'scopes': scopes},
     );
-    return result?.cast<String, dynamic>();
+    if (result == null) return null;
+    return TapTapUser.fromMap(result.cast<String, dynamic>());
   }
 
   @override
-  Future<Map<String, dynamic>?> getCurrentUser() async {
+  Future<TapTapUser?> getCurrentUser() async {
     final result = await methodChannel.invokeMethod<Map<Object?, Object?>>(
       'getCurrentUser',
     );
-    return result?.cast<String, dynamic>();
+    if (result == null) return null;
+    return TapTapUser.fromMap(result.cast<String, dynamic>());
   }
 
   @override

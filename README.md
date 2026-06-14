@@ -52,7 +52,12 @@ try {
     scopes: ['public_profile'],
   );
   if (result != null) {
-    print('登录成功: ${result['openId']}');
+    print('登录成功');
+    print('openId: ${result['openId']}');        // 用户在当前应用中的唯一标识
+    print('unionId: ${result['unionId']}');      // 用户在同一厂商所有应用中的唯一标识
+    print('name: ${result['name']}');             // 玩家在 TapTap 平台的昵称
+    print('avatar: ${result['avatar']}');         // 玩家在 TapTap 平台的头像 url
+    print('accessToken: ${result['accessToken']}'); // 玩家在 TapTap 平台的用户 token 信息
   } else {
     print('用户取消登录');
   }
@@ -61,12 +66,26 @@ try {
 }
 ```
 
+登录返回字段说明：
+
+| 字段 | 说明 |
+|------|------|
+| openId | 用户在当前应用中的唯一标识，每个玩家在每个游戏中的 openId 都不一样 |
+| unionId | 用户在同一厂商所有应用中的唯一标识，一个玩家在同一个厂商的所有游戏中 unionId 是一样的 |
+| name | 玩家在 TapTap 平台的昵称 |
+| avatar | 玩家在 TapTap 平台的头像 url |
+| accessToken | 玩家在 TapTap 平台的用户 token 信息 |
+
 ### 3. 获取当前用户
 
 ```dart
 final user = await FlutterTaptap().getCurrentUser();
 if (user != null) {
-  print('已登录: ${user['openId']}');
+  print('已登录');
+  print('openId: ${user['openId']}');
+  print('unionId: ${user['unionId']}');
+  print('name: ${user['name']}');
+  print('avatar: ${user['avatar']}');
 } else {
   print('未登录');
 }
