@@ -20,6 +20,7 @@ class _MyAppState extends State<MyApp> {
   String _loginResult = '';
   String _userStatus = '';
   String _leaderboardStatus = '';
+  String _complianceStatus = '';
 
   @override
   void initState() {
@@ -213,6 +214,115 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _registerComplianceCallback() async {
+    try {
+      await FlutterTaptap().registerComplianceCallback(
+        onResult: (event) {
+          final code = event['code'] as int;
+          final extra = event['extra'] as Map<String, dynamic>?;
+          
+          setState(() {
+            switch (code) {
+              case 500: // LOGIN_SUCCESS
+                _complianceStatus = '实名回调: 玩家未受到限制，正常进入游戏';
+                break;
+              case 1000: // EXITED
+                _complianceStatus = '实名回调: 退出防沉迷认证，游戏应返回登录页';
+                break;
+              case 1001: // SWITCH_ACCOUNT
+                _complianceStatus = '实名回调: 用户点击切换账号，游戏应返回登录页';
+                break;
+              case 1030: // PERIOD_RESTRICT
+                _complianceStatus = '实名回调: 用户当前时间无法进行游戏';
+                break;
+              case 1050: // DURATION_LIMIT
+                _complianceStatus = '实名回调: 用户无可玩时长';
+                break;
+              case 1100: // AGE_LIMIT
+                _complianceStatus = '实名回调: 当前用户因年龄限制无法进入游戏';
+                break;
+              case 1200: // INVALID_CLIENT_OR_NETWORK_ERROR
+                _complianceStatus = '实名回调: 数据请求失败，请检查应用信息和网络';
+                break;
+              case 9002: // REAL_NAME_STOP
+                _complianceStatus = '实名回调: 用户关闭了实名窗，可重新开始认证';
+                break;
+              default:
+                _complianceStatus = '实名回调: code=$code';
+                break;
+            }
+          });
+          
+          print('实名回调 - code: $code, extra: $extra');
+        },
+      );
+      setState(() {
+        _complianceStatus = '实名回调已注册';
+      });
+    } on PlatformException catch (e) {
+      setState(() {
+        _complianceStatus = '注册实名回调失败: ${e.message}';
+      });
+    }
+  }
+
+  Future<void> _unregisterComplianceCallback() async {
+    try {
+      await FlutterTaptap().unregisterComplianceCallback();
+      setState(() {
+        _complianceStatus = '实名回调已取消注册';
+      });
+    } on PlatformException catch (e) {
+      setState(() {
+        _complianceStatus = '取消注册实名回调失败: ${e.message}';
+      });
+    }
+  }
+
+  Future<void> _startCompliance() async {
+    try {
+      // 获取当前用户的 openId 作为 userIdentifier
+      final user = await FlutterTaptap().getCurrentUser();
+      if (user == null) {
+        setState(() {
+          _complianceStatus = '请先登录';
+        });
+        return;
+      }
+
+      // 开始防沉迷认证
+      await FlutterTaptap().startCompliance(userId: user.openId);
+      setState(() {
+        _complianceStatus = '防沉迷认证已启动';
+      });
+    } on PlatformException catch (e) {
+      setState(() {
+        _complianceStatus = '启动防沉迷认证失败: ${e.message}';
+      });
+    }
+  }
+
+  Future<void> _getRemainingTime() async {
+    try {
+      final remainingTime = await FlutterTaptap().getRemainingTime();
+      setState(() {
+        if (remainingTime >= 0) {
+          _complianceStatus = '剩余时长: ${remainingTime}秒';
+        } else if (remainingTime == -1) {
+          _complianceStatus = '剩余时长: 用户未登录或数据未初始化';
+        } else if (remainingTime == -2) {
+          _complianceStatus = '剩余时长: 用户不受时长限制';
+        } else {
+          _complianceStatus = '剩余时长获取失败';
+        }
+      });
+    } on PlatformException catch (e) {
+      setState(() {
+        _complianceStatus = '获取剩余时长失败: ${e.message}';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -278,6 +388,35 @@ class _MyAppState extends State<MyApp> {
                 ),
                 const SizedBox(height: 20),
                 Text(_leaderboardStatus),
+                const SizedBox(height: 40),
+                const Divider(),
+                const SizedBox(height: 20),
+                const Text(
+                  '实名回调功能',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _registerComplianceCallback,
+                  child: const Text('注册实名回调'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _unregisterComplianceCallback,
+                  child: const Text('取消注册实名回调'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _startCompliance,
+                  child: const Text('开始防沉迷认证'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _getRemainingTime,
+                  child: const Text('获取剩余时长'),
+                ),
+                const SizedBox(height: 20),
+                Text(_complianceStatus),
                 const SizedBox(height: 20),
               ],
             ),

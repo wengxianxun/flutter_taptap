@@ -119,4 +119,53 @@ class FlutterTaptap {
   Future<Map<String, dynamic>> submitScores(List<Map<String, dynamic>> scores) {
     return FlutterTaptapPlatform.instance.submitScores(scores);
   }
+
+  /// 注册实名回调
+  /// 
+  /// [onResult] 回调函数，接收实名事件信息，包含 code 和 extra
+  /// 
+  /// code 说明：
+  /// - 500: LOGIN_SUCCESS - 玩家未受到限制，正常进入游戏
+  /// - 1000: EXITED - 退出防沉迷认证及检查，游戏应返回登录页
+  /// - 1001: SWITCH_ACCOUNT - 用户点击切换账号，游戏应返回登录页
+  /// - 1030: PERIOD_RESTRICT - 用户当前时间无法进行游戏
+  /// - 1050: DURATION_LIMIT - 用户无可玩时长
+  /// - 1100: AGE_LIMIT - 当前用户因年龄限制无法进入游戏
+  /// - 1200: INVALID_CLIENT_OR_NETWORK_ERROR - 数据请求失败
+  /// - 9002: REAL_NAME_STOP - 用户关闭了实名窗，可重新开始认证
+  Future<void> registerComplianceCallback({
+    required Function(Map<String, dynamic>) onResult,
+  }) {
+    return FlutterTaptapPlatform.instance.registerComplianceCallback(
+      onResult: onResult,
+    );
+  }
+
+  /// 取消注册实名回调
+  Future<void> unregisterComplianceCallback() {
+    return FlutterTaptapPlatform.instance.unregisterComplianceCallback();
+  }
+
+  /// 开始防沉迷认证
+  /// 
+  /// [userId] 玩家唯一标识，建议使用 TapTap 用户的 openId
+  /// 
+  /// userId 格式要求：
+  /// - 长度不大于 160
+  /// - 只能包含：数字、大小写字母、下划线（_）、短横（-）、加号（+）、正斜线（/）、等号（=）、英文句号（.）、英文逗号（,）、英文冒号（:）
+  Future<void> startCompliance({
+    required String userId,
+  }) {
+    return FlutterTaptapPlatform.instance.startCompliance(userId: userId);
+  }
+
+  /// 获取玩家当前剩余可玩时长
+  /// 
+  /// 返回值说明：
+  /// - >= 0: 剩余可玩时长（秒）
+  /// - -1: 用户未登录或数据未初始化
+  /// - -2: 用户不受时长限制（如成年人）
+  Future<int> getRemainingTime() {
+    return FlutterTaptapPlatform.instance.getRemainingTime();
+  }
 }

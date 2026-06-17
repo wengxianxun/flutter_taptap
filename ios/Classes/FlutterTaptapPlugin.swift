@@ -3,6 +3,7 @@ import UIKit
 import TapTapCoreSDK
 import TapTapLoginSDK
 import TapTapLeaderboardSDK
+import TapTapComplianceSDK
 
 public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
   private var channel: FlutterMethodChannel?
@@ -153,6 +154,23 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
         }
         result(["success": true])
       }
+    case "registerComplianceCallback":
+      let handler = ComplianceCallbackHandler(channel: channel)
+      TapTapCompliance.registerComplianceCallback(handler)
+      result(nil)
+    case "unregisterComplianceCallback":
+      TapTapCompliance.unregisterComplianceCallback()
+      result(nil)
+    case "startCompliance":
+      guard let args = call.arguments as? [String: Any], let userId = args["userId"] as? String else {
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "userId is required", details: nil))
+        return
+      }
+      TapTapCompliance.startup(userId: userId)
+      result(nil)
+    case "getRemainingTime":
+      let remainingTime = TapTapCompliance.getRemainingTime()
+      result(remainingTime)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -186,5 +204,18 @@ class ShareCallbackHandler: NSObject, TapTapLeaderboardShareCallback {
   
   func onShareFailed(error: Error) {
     channel?.invokeMethod("onLeaderboardShareFailed", arguments: ["message": error.localizedDescription])
+  }
+}
+
+class ComplianceCallbackHandler: NSObject, TapTapComplianceCallback {
+  private weak var channel: FlutterMethodChannel?
+  
+  init(channel: FlutterMethodChannel?) {
+    self.channel = channel
+    super.init()
+  }
+  
+  func onComplianceResult(code: Int, extra: [String : Any]?) {
+    channel?.invokeMethod("onComplianceResult", arguments: ["code": code, "extra": extra ?? [:]])
   }
 }

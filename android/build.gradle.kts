@@ -76,4 +76,5 @@ dependencies {
     implementation("com.taptap.sdk:tap-core:4.10.3")
     implementation("com.taptap.sdk:tap-login:4.10.3")
     implementation("com.taptap.sdk:tap-leaderboard-androidx:4.10.3")
+    implementation("com.taptap.sdk:tap-compliance:4.10.4")
 }

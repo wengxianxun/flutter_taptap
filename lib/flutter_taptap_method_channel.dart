@@ -8,6 +8,7 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
   final methodChannel = const MethodChannel('flutter_taptap');
 
   Function(Map<String, dynamic>)? _leaderboardCallback;
+  Function(Map<String, dynamic>)? _complianceCallback;
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -37,6 +38,9 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
       if (call.method == 'onLeaderboardResult') {
         final result = call.arguments as Map<Object?, Object?>;
         _leaderboardCallback?.call(result.cast<String, dynamic>());
+      } else if (call.method == 'onComplianceResult') {
+        final result = call.arguments as Map<Object?, Object?>;
+        _complianceCallback?.call(result.cast<String, dynamic>());
       }
       return null;
     });
@@ -107,5 +111,34 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
       {'scores': scores},
     );
     return result?.cast<String, dynamic>() ?? {};
+  }
+
+  @override
+  Future<void> registerComplianceCallback({
+    required Function(Map<String, dynamic>) onResult,
+  }) async {
+    _complianceCallback = onResult;
+    await methodChannel.invokeMethod<void>('registerComplianceCallback');
+  }
+
+  @override
+  Future<void> unregisterComplianceCallback() async {
+    _complianceCallback = null;
+    await methodChannel.invokeMethod<void>('unregisterComplianceCallback');
+  }
+
+  @override
+  Future<void> startCompliance({
+    required String userId,
+  }) async {
+    await methodChannel.invokeMethod<void>('startCompliance', {
+      'userId': userId,
+    });
+  }
+
+  @override
+  Future<int> getRemainingTime() async {
+    final result = await methodChannel.invokeMethod<int>('getRemainingTime');
+    return result ?? -1;
   }
 }

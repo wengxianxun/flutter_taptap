@@ -73,4 +73,24 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
   Future<Map<String, dynamic>> submitScores(List<Map<String, dynamic>> scores) {
     throw UnimplementedError('submitScores() has not been implemented.');
   }
+
+  Future<void> registerComplianceCallback({
+    required Function(Map<String, dynamic>) onResult,
+  }) {
+    throw UnimplementedError('registerComplianceCallback() has not been implemented.');
+  }
+
+  Future<void> unregisterComplianceCallback() {
+    throw UnimplementedError('unregisterComplianceCallback() has not been implemented.');
+  }
+
+  Future<void> startCompliance({
+    required String userId,
+  }) {
+    throw UnimplementedError('startCompliance() has not been implemented.');
+  }
+
+  Future<int> getRemainingTime() {
+    throw UnimplementedError('getRemainingTime() has not been implemented.');
+  }
 }

@@ -20,6 +20,9 @@ import com.taptap.sdk.leaderboard.callback.TapTapLeaderboardShareCallback
 import com.taptap.sdk.leaderboard.callback.TapTapLeaderboardResponseCallback
 import com.taptap.sdk.leaderboard.data.request.SubmitScoresRequest
 import com.taptap.sdk.leaderboard.data.response.SubmitScoresResponse
+import com.taptap.sdk.compliance.TapTapCompliance
+import com.taptap.sdk.compliance.TapTapComplianceCallback
+import com.taptap.sdk.compliance.constants.ComplianceMessage
 import android.app.Activity
 import androidx.annotation.NonNull
 import android.util.Log
@@ -29,6 +32,7 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var context: android.content.Context
     private var activity: Activity? = null
     private var leaderboardCallback: TapTapLeaderboardCallback? = null
+    private var complianceCallback: TapTapComplianceCallback? = null
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_taptap")
@@ -233,6 +237,55 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
                     }
                 )
+            }
+            "registerComplianceCallback" -> {
+                complianceCallback = object : TapTapComplianceCallback {
+                    override fun onComplianceResult(code: Int, extra: Map<String, Any>?) {
+                        when (code) {
+                            ComplianceMessage.LOGIN_SUCCESS -> {
+                                Log.d("Compliance", "登录成功")
+                            }
+                            ComplianceMessage.EXITED -> {
+                                Log.d("Compliance", "退出登录")
+                            }
+                            ComplianceMessage.SWITCH_ACCOUNT -> {
+                                Log.d("Compliance", "切换账号")
+                            }
+                        }
+                        // 通过 MethodChannel 将回调信息发送给 Flutter 端
+                        channel.invokeMethod("onComplianceResult", mapOf(
+                            "code" to code,
+                            "extra" to (extra ?: emptyMap<String, Any>())
+                        ))
+                    }
+                }
+                TapTapCompliance.registerComplianceCallback(complianceCallback!!)
+                result.success(null)
+            }
+            "unregisterComplianceCallback" -> {
+                if (complianceCallback != null) {
+                    TapTapCompliance.unregisterComplianceCallback(complianceCallback!!)
+                    complianceCallback = null
+                }
+                result.success(null)
+            }
+            "startCompliance" -> {
+                val userId = call.argument<String>("userId")
+                if (userId.isNullOrEmpty()) {
+                    result.error("INVALID_ARGUMENTS", "userId is required", null)
+                    return
+                }
+                val currentActivity = activity
+                if (currentActivity == null) {
+                    result.error("ACTIVITY_NOT_AVAILABLE", "Activity is not available", null)
+                    return
+                }
+                TapTapCompliance.startup(currentActivity, userId)
+                result.success(null)
+            }
+            "getRemainingTime" -> {
+                val remainingTime = TapTapCompliance.getRemainingTime()
+                result.success(remainingTime)
             }
             else -> {
                 result.notImplemented()
