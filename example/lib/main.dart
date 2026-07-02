@@ -222,15 +222,12 @@ class _MyAppState extends State<MyApp> {
         maxCount: 10,
       );
 
-      final leaderboard = result['leaderboard'] as Map<String, dynamic>? ?? {};
-      final scores = result['scores'] as List<dynamic>? ?? [];
       setState(() {
-        _leaderboardStatus = '排行榜: ${leaderboard['name']} (${scores.length}人)';
+        _leaderboardStatus = '排行榜: ${result.leaderboard.name} (${result.scores.length}人)';
       });
 
-      for (var score in scores) {
-        final s = score as Map<String, dynamic>;
-        print('排名: ${s['rank']}, 分数: ${s['scoreDisplay']}, 玩家: ${s['playerName']}');
+      for (var score in result.scores) {
+        print('排名: ${score.rank}, 分数: ${score.scoreDisplay}, 玩家: ${score.playerName} 头像: ${score.playerAvatar}');
       }
     } on PlatformException catch (e) {
       setState(() {

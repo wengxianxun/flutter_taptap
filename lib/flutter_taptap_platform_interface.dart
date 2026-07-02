@@ -1,9 +1,11 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'flutter_taptap_method_channel.dart';
-import 'flutter_taptap_user.dart';
+import 'model/flutter_taptap_user.dart';
+import 'model/flutter_taptap_leaderboard.dart';
 
-export 'flutter_taptap_user.dart';
+export 'model/flutter_taptap_user.dart';
+export 'model/flutter_taptap_leaderboard.dart';
 
 enum TapTapRegion { cn, global }
 
@@ -35,9 +37,7 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
     throw UnimplementedError('init() has not been implemented.');
   }
 
-  Future<TapTapUser?> login({
-    List<String> scopes = const ['public_profile'],
-  }) {
+  Future<TapTapUser?> login({List<String> scopes = const ['public_profile']}) {
     throw UnimplementedError('login() has not been implemented.');
   }
 
@@ -59,43 +59,53 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
   Future<void> registerLeaderboardCallback({
     required Function(Map<String, dynamic>) onResult,
   }) {
-    throw UnimplementedError('registerLeaderboardCallback() has not been implemented.');
+    throw UnimplementedError(
+      'registerLeaderboardCallback() has not been implemented.',
+    );
   }
 
   Future<void> unregisterLeaderboardCallback() {
-    throw UnimplementedError('unregisterLeaderboardCallback() has not been implemented.');
+    throw UnimplementedError(
+      'unregisterLeaderboardCallback() has not been implemented.',
+    );
   }
 
   Future<void> setLeaderboardShareCallback() {
-    throw UnimplementedError('setLeaderboardShareCallback() has not been implemented.');
+    throw UnimplementedError(
+      'setLeaderboardShareCallback() has not been implemented.',
+    );
   }
 
   Future<Map<String, dynamic>> submitScores(List<Map<String, dynamic>> scores) {
     throw UnimplementedError('submitScores() has not been implemented.');
   }
 
-  Future<Map<String, dynamic>> loadPlayerCenteredScores({
+  Future<LeaderboardResponse> loadPlayerCenteredScores({
     required String leaderboardId,
     String leaderboardCollection = 'PUBLIC',
     String periodToken = '',
     int maxCount = 10,
   }) {
-    throw UnimplementedError('loadPlayerCenteredScores() has not been implemented.');
+    throw UnimplementedError(
+      'loadPlayerCenteredScores() has not been implemented.',
+    );
   }
 
   Future<void> registerComplianceCallback({
     required Function(Map<String, dynamic>) onResult,
   }) {
-    throw UnimplementedError('registerComplianceCallback() has not been implemented.');
+    throw UnimplementedError(
+      'registerComplianceCallback() has not been implemented.',
+    );
   }
 
   Future<void> unregisterComplianceCallback() {
-    throw UnimplementedError('unregisterComplianceCallback() has not been implemented.');
+    throw UnimplementedError(
+      'unregisterComplianceCallback() has not been implemented.',
+    );
   }
 
-  Future<void> startCompliance({
-    required String userId,
-  }) {
+  Future<void> startCompliance({required String userId}) {
     throw UnimplementedError('startCompliance() has not been implemented.');
   }
 

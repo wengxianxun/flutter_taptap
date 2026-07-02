@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'flutter_taptap_platform_interface.dart';
+import 'model/flutter_taptap_user.dart';
+import 'model/flutter_taptap_leaderboard.dart';
 
 class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
   @visibleForTesting
@@ -114,22 +116,21 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
   }
 
   @override
-  Future<Map<String, dynamic>> loadPlayerCenteredScores({
+  Future<LeaderboardResponse> loadPlayerCenteredScores({
     required String leaderboardId,
     String leaderboardCollection = 'PUBLIC',
     String periodToken = '',
     int maxCount = 10,
   }) async {
-    final result = await methodChannel.invokeMethod<Map<Object?, Object?>>(
-      'loadPlayerCenteredScores',
-      {
-        'leaderboardId': leaderboardId,
-        'leaderboardCollection': leaderboardCollection,
-        'periodToken': periodToken,
-        'maxCount': maxCount,
-      },
-    );
-    return _castMap(result) ?? {};
+    final result = await methodChannel
+        .invokeMethod<Map<Object?, Object?>>('loadPlayerCenteredScores', {
+          'leaderboardId': leaderboardId,
+          'leaderboardCollection': leaderboardCollection,
+          'periodToken': periodToken,
+          'maxCount': maxCount,
+        });
+    final map = _castMap(result) ?? {};
+    return LeaderboardResponse.fromMap(map);
   }
 
   Map<String, dynamic>? _castMap(Map<Object?, Object?>? map) {
@@ -168,9 +169,7 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
   }
 
   @override
-  Future<void> startCompliance({
-    required String userId,
-  }) async {
+  Future<void> startCompliance({required String userId}) async {
     await methodChannel.invokeMethod<void>('startCompliance', {
       'userId': userId,
     });

@@ -59,10 +59,7 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-
-
-        Log.e("Leaderboard", "原生call.........");
-
+//        Log.e("Leaderboard", "原生call.........");
         when (call.method) {
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
@@ -267,8 +264,8 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     maxCount = maxCount,
                     callback = object : TapTapLeaderboardResponseCallback<LeaderboardScoresResponse>() {
                         override fun onSuccess(data: LeaderboardScoresResponse) {
-                            Log.i("Leaderboard", "onSuccess called")
-                            Log.i("Leaderboard", "相近分数数据: $data")
+
+//                            Log.i("Leaderboard", "相近分数数据: $data")
                             
                             val leaderboard = data.leaderboard
                             val leaderboardData = mapOf(
