@@ -120,6 +120,32 @@ class FlutterTaptap {
     return FlutterTaptapPlatform.instance.submitScores(scores);
   }
 
+  /// 获取用户相近分数
+  /// 
+  /// 查询当前用户相近的其他用户成绩（上下X位）
+  /// 
+  /// [leaderboardId] 排行榜ID
+  /// [leaderboardCollection] 排行榜类型，'PUBLIC' 为总榜，'FRIENDS' 为好友榜，默认为 'PUBLIC'
+  /// [periodToken] 时间周期标识，如 'weekly'、'monthly'、'yearly'，默认为空
+  /// [maxCount] 最大返回数量，默认为 10
+  /// 
+  /// 返回 Map，包含：
+  /// - scores: 分数列表，每个元素包含 rank、score、playerId、playerName、playerAvatar
+  /// - totalCount: 总分数量
+  Future<Map<String, dynamic>> loadPlayerCenteredScores({
+    required String leaderboardId,
+    String leaderboardCollection = 'PUBLIC',
+    String periodToken = '',
+    int maxCount = 10,
+  }) {
+    return FlutterTaptapPlatform.instance.loadPlayerCenteredScores(
+      leaderboardId: leaderboardId,
+      leaderboardCollection: leaderboardCollection,
+      periodToken: periodToken,
+      maxCount: maxCount,
+    );
+  }
+
   /// 注册实名回调
   /// 
   /// [onResult] 回调函数，接收实名事件信息，包含 code 和 extra

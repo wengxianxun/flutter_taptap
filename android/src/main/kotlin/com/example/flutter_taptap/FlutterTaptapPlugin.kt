@@ -18,7 +18,9 @@ import com.taptap.sdk.leaderboard.androidx.TapTapLeaderboard
 import com.taptap.sdk.leaderboard.callback.TapTapLeaderboardCallback
 import com.taptap.sdk.leaderboard.callback.TapTapLeaderboardShareCallback
 import com.taptap.sdk.leaderboard.callback.TapTapLeaderboardResponseCallback
+import com.taptap.sdk.leaderboard.data.request.LeaderboardCollection
 import com.taptap.sdk.leaderboard.data.request.SubmitScoresRequest
+import com.taptap.sdk.leaderboard.data.response.LeaderboardScoresResponse
 import com.taptap.sdk.leaderboard.data.response.SubmitScoresResponse
 import com.taptap.sdk.compliance.TapTapCompliance
 import com.taptap.sdk.compliance.TapTapComplianceCallback
@@ -57,6 +59,10 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
+
+
+        Log.e("Leaderboard", "原生call.........");
+
         when (call.method) {
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
@@ -237,6 +243,67 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
                     }
                 )
+            }
+            "loadPlayerCenteredScores" -> {
+                Log.d("Leaderboard", "loadPlayerCenteredScores called")
+                
+                val leaderboardId = call.argument<String>("leaderboardId") ?: ""
+                val collectionStr = call.argument<String>("leaderboardCollection") ?: "PUBLIC"
+                val periodToken = call.argument<String>("periodToken") ?: ""
+                val maxCount = call.argument<Int>("maxCount") ?: 10
+                
+                Log.d("Leaderboard", "Params: leaderboardId=$leaderboardId, collection=$collectionStr, periodToken=$periodToken, maxCount=$maxCount")
+
+                val collection = if (collectionStr == "FRIENDS") {
+                    LeaderboardCollection.FRIENDS
+                } else {
+                    LeaderboardCollection.PUBLIC
+                }
+
+                TapTapLeaderboard.loadPlayerCenteredScores(
+                    leaderboardId = leaderboardId,
+                    leaderboardCollection = collection,
+                    periodToken = periodToken,
+                    maxCount = maxCount,
+                    callback = object : TapTapLeaderboardResponseCallback<LeaderboardScoresResponse>() {
+                        override fun onSuccess(data: LeaderboardScoresResponse) {
+                            Log.i("Leaderboard", "onSuccess called")
+                            Log.i("Leaderboard", "相近分数数据: $data")
+                            
+                            val leaderboard = data.leaderboard
+                            val leaderboardData = mapOf(
+                                "id" to (leaderboard?.id ?: ""),
+                                "name" to (leaderboard?.name ?: "")
+                            )
+                            
+                            val scores = data.scores ?: emptyList()
+                            val scoresList = scores.map { score ->
+                                val user = score.user
+                                val avatar = user?.avatar
+                                mapOf(
+                                    "rank" to score.rank,
+                                    "rankDisplay" to (score.rankDisplay ?: ""),
+                                    "score" to score.score,
+                                    "scoreDisplay" to (score.scoreDisplay ?: ""),
+                                    "playerId" to (user?.openid ?: ""),
+                                    "playerName" to (user?.name ?: ""),
+                                    "playerAvatar" to (avatar?.url ?: "")
+                                )
+                            }
+                            result.success(mapOf(
+                                "leaderboard" to leaderboardData,
+                                "scores" to scoresList
+                            ))
+                        }
+
+                        override fun onFailure(code: Int, message: String) {
+                            Log.e("Leaderboard", "onFailure called - code=$code, message=$message")
+                            result.error("LOAD_FAILED", message, code)
+                        }
+                    }
+                )
+                
+                Log.d("Leaderboard", "loadPlayerCenteredScores method finished")
             }
             "registerComplianceCallback" -> {
                 complianceCallback = object : TapTapComplianceCallback {

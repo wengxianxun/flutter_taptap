@@ -74,6 +74,15 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
     throw UnimplementedError('submitScores() has not been implemented.');
   }
 
+  Future<Map<String, dynamic>> loadPlayerCenteredScores({
+    required String leaderboardId,
+    String leaderboardCollection = 'PUBLIC',
+    String periodToken = '',
+    int maxCount = 10,
+  }) {
+    throw UnimplementedError('loadPlayerCenteredScores() has not been implemented.');
+  }
+
   Future<void> registerComplianceCallback({
     required Function(Map<String, dynamic>) onResult,
   }) {

@@ -114,6 +114,46 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
   }
 
   @override
+  Future<Map<String, dynamic>> loadPlayerCenteredScores({
+    required String leaderboardId,
+    String leaderboardCollection = 'PUBLIC',
+    String periodToken = '',
+    int maxCount = 10,
+  }) async {
+    final result = await methodChannel.invokeMethod<Map<Object?, Object?>>(
+      'loadPlayerCenteredScores',
+      {
+        'leaderboardId': leaderboardId,
+        'leaderboardCollection': leaderboardCollection,
+        'periodToken': periodToken,
+        'maxCount': maxCount,
+      },
+    );
+    return _castMap(result) ?? {};
+  }
+
+  Map<String, dynamic>? _castMap(Map<Object?, Object?>? map) {
+    if (map == null) return null;
+    final result = <String, dynamic>{};
+    map.forEach((key, value) {
+      final stringKey = key?.toString() ?? '';
+      if (value is Map<Object?, Object?>) {
+        result[stringKey] = _castMap(value);
+      } else if (value is List<Object?>) {
+        result[stringKey] = value.map((item) {
+          if (item is Map<Object?, Object?>) {
+            return _castMap(item);
+          }
+          return item;
+        }).toList();
+      } else {
+        result[stringKey] = value;
+      }
+    });
+    return result;
+  }
+
+  @override
   Future<void> registerComplianceCallback({
     required Function(Map<String, dynamic>) onResult,
   }) async {

@@ -56,9 +56,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _login() async {
     try {
-      final result = await FlutterTaptap().login(
-        scopes: ['public_profile'],
-      );
+      final result = await FlutterTaptap().login(scopes: ['public_profile']);
       if (result != null) {
         setState(() {
           _loginResult =
@@ -95,7 +93,8 @@ class _MyAppState extends State<MyApp> {
     final user = await FlutterTaptap().getCurrentUser();
     if (user != null) {
       setState(() {
-        _userStatus = '已登录\n'
+        _userStatus =
+            '已登录\n'
             'openId: ${user.openId}\n'
             'unionId: ${user.unionId}\n'
             'name: ${user.name}\n'
@@ -214,13 +213,40 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _loadPlayerCenteredScores() async {
+    try {
+      final result = await FlutterTaptap().loadPlayerCenteredScores(
+        leaderboardId: 'xab1tc1s7am9vp9wxb',
+        leaderboardCollection: 'PUBLIC',
+        periodToken: 'weekly',
+        maxCount: 10,
+      );
+
+      final leaderboard = result['leaderboard'] as Map<String, dynamic>? ?? {};
+      final scores = result['scores'] as List<dynamic>? ?? [];
+      setState(() {
+        _leaderboardStatus = '排行榜: ${leaderboard['name']} (${scores.length}人)';
+      });
+
+      for (var score in scores) {
+        final s = score as Map<String, dynamic>;
+        print('排名: ${s['rank']}, 分数: ${s['scoreDisplay']}, 玩家: ${s['playerName']}');
+      }
+    } on PlatformException catch (e) {
+      setState(() {
+        _leaderboardStatus = '获取相近分数失败: ${e.message}';
+      });
+      print('获取相近分数失败: ${e.message}');
+    }
+  }
+
   Future<void> _registerComplianceCallback() async {
     try {
       await FlutterTaptap().registerComplianceCallback(
         onResult: (event) {
           final code = event['code'] as int;
           final extra = event['extra'] as Map<String, dynamic>?;
-          
+
           setState(() {
             switch (code) {
               case 500: // LOGIN_SUCCESS
@@ -252,7 +278,7 @@ class _MyAppState extends State<MyApp> {
                 break;
             }
           });
-          
+
           print('实名回调 - code: $code, extra: $extra');
         },
       );
@@ -291,7 +317,7 @@ class _MyAppState extends State<MyApp> {
       }
 
       // 开始防沉迷认证
-      await FlutterTaptap().startCompliance(userId: user.openId);
+      await FlutterTaptap().startCompliance(userId: user.openId); //
       setState(() {
         _complianceStatus = '防沉迷认证已启动';
       });
@@ -341,10 +367,7 @@ class _MyAppState extends State<MyApp> {
                   child: const Text('TapTap登录'),
                 ),
                 const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _logout,
-                  child: const Text('登出'),
-                ),
+                ElevatedButton(onPressed: _logout, child: const Text('登出')),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: _checkLoginStatus,
@@ -385,6 +408,11 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: _submitScores,
                   child: const Text('提交分数'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _loadPlayerCenteredScores,
+                  child: const Text('获取相近分数'),
                 ),
                 const SizedBox(height: 20),
                 Text(_leaderboardStatus),
