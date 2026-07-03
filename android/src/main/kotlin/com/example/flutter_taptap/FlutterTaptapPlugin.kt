@@ -100,6 +100,7 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     scopes,
                     object : TapTapCallback<TapTapAccount> {
                         override fun onSuccess(account: TapTapAccount) {
+                            Log.i("TapTap：", "登录成功")
                             // AccessToken 是对象，需要转为字符串
                             val tokenStr = account.accessToken?.toString() ?: ""
                             val accountMap = mapOf(
@@ -113,10 +114,12 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
 
                         override fun onCancel() {
+                            Log.i("TapTap：", "登录onCancel")
                             result.success(null)
                         }
 
                         override fun onFail(exception: TapTapException) {
+                            Log.i("TapTap：", "登录onFail$exception.message")
                             result.error("LOGIN_FAILED", exception.message ?: "Login failed", null)
                         }
                     }
