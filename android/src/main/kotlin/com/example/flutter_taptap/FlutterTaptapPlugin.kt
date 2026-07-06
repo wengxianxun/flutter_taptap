@@ -245,14 +245,14 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 )
             }
             "loadPlayerCenteredScores" -> {
-                Log.d("Leaderboard", "loadPlayerCenteredScores called")
+                Log.i("Leaderboard", "loadPlayerCenteredScores called")
                 
                 val leaderboardId = call.argument<String>("leaderboardId") ?: ""
                 val collectionStr = call.argument<String>("leaderboardCollection") ?: "PUBLIC"
                 val periodToken = call.argument<String>("periodToken") ?: ""
                 val maxCount = call.argument<Int>("maxCount") ?: 10
                 
-                Log.d("Leaderboard", "Params: leaderboardId=$leaderboardId, collection=$collectionStr, periodToken=$periodToken, maxCount=$maxCount")
+                Log.i("Leaderboard", "Params: leaderboardId=$leaderboardId, collection=$collectionStr, periodToken=$periodToken, maxCount=$maxCount")
 
                 val collection = if (collectionStr == "FRIENDS") {
                     LeaderboardCollection.FRIENDS
@@ -268,7 +268,7 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     callback = object : TapTapLeaderboardResponseCallback<LeaderboardScoresResponse>() {
                         override fun onSuccess(data: LeaderboardScoresResponse) {
 
-//                            Log.i("Leaderboard", "相近分数数据: $data")
+                            Log.i("Leaderboard", "相近分数数据: $data")
                             
                             val leaderboard = data.leaderboard
                             val leaderboardData = mapOf(

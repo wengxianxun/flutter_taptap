@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'flutter_taptap_platform_interface.dart';
-import 'model/flutter_taptap_user.dart';
 import 'model/flutter_taptap_leaderboard.dart';
+import 'model/flutter_taptap_user.dart';
 
 class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
   @visibleForTesting
