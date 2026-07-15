@@ -227,13 +227,39 @@ class _MyAppState extends State<MyApp> {
       });
 
       for (var score in result.scores) {
-        print('排名: ${score.rank}, 分数: ${score.scoreDisplay}, 玩家: ${score.playerName} 头像: ${score.playerAvatar}');
+        print('排名: ${score.rank}, 分数: ${score.scoreDisplay}, 玩家: ${score.playerName}');
       }
     } on PlatformException catch (e) {
       setState(() {
         _leaderboardStatus = '获取相近分数失败: ${e.message}';
       });
       print('获取相近分数失败: ${e.message}');
+    }
+  }
+
+  String? _nextPageToken;
+
+  Future<void> _loadLeaderboardScores() async {
+    try {
+      final result = await FlutterTaptap().loadLeaderboardScores(
+        leaderboardId: 'xab1tc1s7am9vp9wxb',
+        leaderboardCollection: 'PUBLIC',
+        nextPage: _nextPageToken,
+      );
+
+      setState(() {
+        _nextPageToken = result.nextPage;
+        _leaderboardStatus = '排行榜: ${result.leaderboard.name} (${result.scores.length}人), 下一页: ${result.nextPage ?? '无'}';
+      });
+
+      for (var score in result.scores) {
+        print('排名: ${score.rank}, 分数: ${score.scoreDisplay}, 玩家: ${score.playerName}');
+      }
+    } on PlatformException catch (e) {
+      setState(() {
+        _leaderboardStatus = '获取排行榜数据失败: ${e.message}';
+      });
+      print('获取排行榜数据失败: ${e.message}');
     }
   }
 
@@ -410,6 +436,11 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: _loadPlayerCenteredScores,
                   child: const Text('获取相近分数'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _loadLeaderboardScores,
+                  child: const Text('获取排行榜数据'),
                 ),
                 const SizedBox(height: 20),
                 Text(_leaderboardStatus),

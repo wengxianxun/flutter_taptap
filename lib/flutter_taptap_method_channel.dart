@@ -133,6 +133,22 @@ class MethodChannelFlutterTaptap extends FlutterTaptapPlatform {
     return LeaderboardResponse.fromMap(map);
   }
 
+  @override
+  Future<LeaderboardResponse> loadLeaderboardScores({
+    required String leaderboardId,
+    String leaderboardCollection = 'PUBLIC',
+    String? nextPage,
+  }) async {
+    final result = await methodChannel
+        .invokeMethod<Map<Object?, Object?>>('loadLeaderboardScores', {
+          'leaderboardId': leaderboardId,
+          'leaderboardCollection': leaderboardCollection,
+          'nextPage': nextPage,
+        });
+    final map = _castMap(result) ?? {};
+    return LeaderboardResponse.fromMap(map);
+  }
+
   Map<String, dynamic>? _castMap(Map<Object?, Object?>? map) {
     if (map == null) return null;
     final result = <String, dynamic>{};

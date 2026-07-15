@@ -145,6 +145,30 @@ class FlutterTaptap {
     );
   }
 
+  /// 获取排行榜数据
+  ///
+  /// 分页获取排行榜数据，支持总榜和好友榜
+  ///
+  /// [leaderboardId] 排行榜ID
+  /// [leaderboardCollection] 排行榜类型，'PUBLIC' 为总榜，'FRIENDS' 为好友榜，默认为 'PUBLIC'
+  /// [nextPage] 分页标记，首次请求传 null，后续请求传入上次返回的 nextPage
+  ///
+  /// 返回 LeaderboardResponse 对象，包含：
+  /// - leaderboard: 排行榜信息（id、name）
+  /// - scores: 分数列表，每个元素为 Score 对象
+  /// - nextPage: 下一页标记，为 null 表示没有更多
+  Future<LeaderboardResponse> loadLeaderboardScores({
+    required String leaderboardId,
+    String leaderboardCollection = 'PUBLIC',
+    String? nextPage,
+  }) {
+    return FlutterTaptapPlatform.instance.loadLeaderboardScores(
+      leaderboardId: leaderboardId,
+      leaderboardCollection: leaderboardCollection,
+      nextPage: nextPage,
+    );
+  }
+
   /// 注册实名回调
   ///
   /// [onResult] 回调函数，接收实名事件信息，包含 code 和 extra

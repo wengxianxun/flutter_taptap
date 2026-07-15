@@ -1,16 +1,19 @@
 class LeaderboardResponse {
   final Leaderboard leaderboard;
   final List<Score> scores;
+  final String? nextPage;
 
   LeaderboardResponse({
     required this.leaderboard,
     required this.scores,
+    this.nextPage,
   });
 
   factory LeaderboardResponse.fromMap(Map<String, dynamic> map) {
     return LeaderboardResponse(
       leaderboard: Leaderboard.fromMap(map['leaderboard'] as Map<String, dynamic>? ?? {}),
       scores: (map['scores'] as List<dynamic>? ?? []).map((e) => Score.fromMap(e as Map<String, dynamic>)).toList(),
+      nextPage: map['nextPage'] as String?,
     );
   }
 
@@ -18,12 +21,13 @@ class LeaderboardResponse {
     return {
       'leaderboard': leaderboard.toMap(),
       'scores': scores.map((e) => e.toMap()).toList(),
+      'nextPage': nextPage,
     };
   }
 
   @override
   String toString() {
-    return 'LeaderboardResponse(leaderboard: $leaderboard, scores: $scores)';
+    return 'LeaderboardResponse(leaderboard: $leaderboard, scores: $scores, nextPage: $nextPage)';
   }
 }
 

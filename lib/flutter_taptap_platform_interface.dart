@@ -91,6 +91,16 @@ abstract class FlutterTaptapPlatform extends PlatformInterface {
     );
   }
 
+  Future<LeaderboardResponse> loadLeaderboardScores({
+    required String leaderboardId,
+    String leaderboardCollection = 'PUBLIC',
+    String? nextPage,
+  }) {
+    throw UnimplementedError(
+      'loadLeaderboardScores() has not been implemented.',
+    );
+  }
+
   Future<void> registerComplianceCallback({
     required Function(Map<String, dynamic>) onResult,
   }) {

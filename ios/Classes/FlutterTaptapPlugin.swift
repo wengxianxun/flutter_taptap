@@ -208,6 +208,60 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
           result(["leaderboard": ["id": "", "name": ""], "scores": []])
         }
       }
+      
+    case "loadLeaderboardScores":
+      guard let args = call.arguments as? [String: Any] else {
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+        return
+      }
+      
+      let leaderboardId = args["leaderboardId"] as? String ?? ""
+      let collectionStr = args["leaderboardCollection"] as? String ?? "PUBLIC"
+      let nextPage = args["nextPage"] as? String
+      
+      let collection: LeaderboardCollection = collectionStr == "FRIENDS" ? .friends : .public
+      
+      TapTapLeaderboard.loadLeaderboardScores(
+        leaderboardId: leaderboardId,
+        leaderboardCollection: collection,
+        nextPage: nextPage
+      ) { response, error in
+        if let error = error {
+          let nsError = error as NSError
+          result(FlutterError(code: "LOAD_FAILED", message: nsError.localizedDescription, details: nsError.code))
+          return
+        }
+        
+        if let response = response {
+          let leaderboard = response.leaderboard
+          let leaderboardData: [String: Any] = [
+            "id": leaderboard?.id ?? "",
+            "name": leaderboard?.name ?? ""
+          ]
+          
+          let scoresList = response.scores?.map { score -> [String: Any] in
+            let user = score.user
+            let avatar = user?.avatar
+            return [
+              "rank": score.rank,
+              "rankDisplay": score.rankDisplay ?? "",
+              "score": score.score,
+              "scoreDisplay": score.scoreDisplay ?? "",
+              "playerId": user?.openid ?? "",
+              "playerName": user?.name ?? "",
+              "playerAvatar": avatar?.url ?? ""
+            ]
+          } ?? []
+          
+          result([
+            "leaderboard": leaderboardData,
+            "scores": scoresList,
+            "nextPage": response.nextPage ?? ""
+          ])
+        } else {
+          result(["leaderboard": ["id": "", "name": ""], "scores": [], "nextPage": ""])
+        }
+      }
     case "registerComplianceCallback":
       let handler = ComplianceCallbackHandler(channel: channel)
       TapTapCompliance.registerComplianceCallback(handler)

@@ -305,6 +305,57 @@ class FlutterTaptapPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 
                 Log.d("Leaderboard", "loadPlayerCenteredScores method finished")
             }
+            "loadLeaderboardScores" -> {
+                val leaderboardId = call.argument<String>("leaderboardId") ?: ""
+                val collectionStr = call.argument<String>("leaderboardCollection") ?: "PUBLIC"
+                val nextPage = call.argument<String>("nextPage")
+
+                val collection = if (collectionStr == "FRIENDS") {
+                    LeaderboardCollection.FRIENDS
+                } else {
+                    LeaderboardCollection.PUBLIC
+                }
+
+                TapTapLeaderboard.loadLeaderboardScores(
+                    leaderboardId = leaderboardId,
+                    leaderboardCollection = collection,
+                    nextPage = nextPage,
+                    callback = object : TapTapLeaderboardResponseCallback<LeaderboardScoresResponse>() {
+                        override fun onSuccess(data: LeaderboardScoresResponse) {
+                            val leaderboard = data.leaderboard
+                            val leaderboardData = mapOf(
+                                "id" to (leaderboard?.id ?: ""),
+                                "name" to (leaderboard?.name ?: "")
+                            )
+
+                            val scores = data.scores ?: emptyList()
+                            val scoresList = scores.map { score ->
+                                val user = score.user
+                                val avatar = user?.avatar
+                                mapOf(
+                                    "rank" to score.rank,
+                                    "rankDisplay" to (score.rankDisplay ?: ""),
+                                    "score" to score.score,
+                                    "scoreDisplay" to (score.scoreDisplay ?: ""),
+                                    "playerId" to (user?.openid ?: ""),
+                                    "playerName" to (user?.name ?: ""),
+                                    "playerAvatar" to (avatar?.url ?: "")
+                                )
+                            }
+                            result.success(mapOf(
+                                "leaderboard" to leaderboardData,
+                                "scores" to scoresList,
+                                "nextPage" to (data.nextPage ?: "")
+                            ))
+                        }
+
+                        override fun onFailure(code: Int, message: String) {
+                            Log.e("Leaderboard", "获取排行榜数据失败: code=$code, message=$message")
+                            result.error("LOAD_FAILED", message, code)
+                        }
+                    }
+                )
+            }
             "registerComplianceCallback" -> {
                 complianceCallback = object : TapTapComplianceCallback {
                     override fun onComplianceResult(code: Int, extra: Map<String, Any>?) {
