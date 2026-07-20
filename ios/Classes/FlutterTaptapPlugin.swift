@@ -7,6 +7,9 @@ import TapTapComplianceSDK
 
 public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
   private var channel: FlutterMethodChannel?
+  private var complianceHandler: ComplianceCallbackHandler?
+  private var leaderboardCallbackHandler: LeaderboardCallbackHandler?
+  private var shareCallbackHandler: ShareCallbackHandler?
   
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_taptap", binaryMessenger: registrar.messenger())
@@ -31,16 +34,20 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
       let screenOrientation = args["screenOrientation"] as? Int ?? 1
       let enableLog = args["enableLog"] as? Bool ?? false
       
-      let region: TapRegion = regionStr == "GLOBAL" ? .global : .CN
+      let region: TapTapRegionType = regionStr == "GLOBAL" ? .overseas : .CN
+      let orientation: TapTapScreenOrientation = screenOrientation == 0 ? .portrait : .landscape
       
       let options = TapTapSdkOptions()
       options.clientId = clientId
       options.clientToken = clientToken
       options.region = region
-      options.screenOrientation = screenOrientation
+      options.screenOrientation = orientation
       options.enableLog = enableLog
       
-      TapTapSdk.initSDK(with: options)
+      TapTapSDK.initWith(options)
+      
+      complianceHandler = ComplianceCallbackHandler(channel: channel)
+      TapComplianceService.`init`(complianceHandler!, gameIdentifier: clientId)
       result(nil)
     case "login":
       guard let args = call.arguments as? [String: Any] else {
@@ -49,34 +56,28 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
       }
       
       let scopes = args["scopes"] as? [String] ?? ["public_profile"]
-      let tapScopes = scopes.map { scope -> TapTapScope in
-        switch scope {
-        case "public_profile":
-          return .publicProfile
-        default:
-          return .publicProfile
-        }
-      }
       
       guard let viewController = UIApplication.shared.keyWindow?.rootViewController else {
         result(FlutterError(code: "VIEW_CONTROLLER_NOT_AVAILABLE", message: "View controller is not available", details: nil))
         return
       }
       
-      TapTapLogin.login(with: viewController, permissions: tapScopes) { account, error in
+      TapTapLogin.Login(scopes: scopes, viewController: viewController) { success, error, account in
         if let error = error {
-          let errorCode = (error as NSError).code
-          result(FlutterError(code: "LOGIN_FAILED", message: error.localizedDescription, details: errorCode))
+          let nsError = error as NSError
+          result(FlutterError(code: "LOGIN_FAILED", message: nsError.localizedDescription, details: nsError.code))
           return
         }
         
         if let account = account {
+          let userInfo = account.userInfo
+          let accessToken = account.accessToken?.toJsonString() ?? ""
           let accountInfo: [String: Any] = [
-            "openId": account.userId ?? "",
-            "unionId": account.unionId ?? "",
-            "name": account.name ?? "",
-            "avatar": account.avatarUrl ?? "",
-            "accessToken": account.accessToken ?? ""
+            "openId": userInfo?.openId ?? "",
+            "unionId": userInfo?.unionId ?? "",
+            "name": userInfo?.name ?? "",
+            "avatar": userInfo?.avatar ?? "",
+            "accessToken": accessToken
           ]
           result(accountInfo)
         } else {
@@ -84,13 +85,15 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
         }
       }
     case "getCurrentUser":
-      if let account = TapTapLogin.currentTapAccount() {
+      if let account = TapTapLogin.getCurrentTapAccount() {
+        let userInfo = account.userInfo
+        let accessToken = account.accessToken?.toJsonString() ?? ""
         let accountInfo: [String: Any] = [
-          "openId": account.userId ?? "",
-          "unionId": account.unionId ?? "",
-          "name": account.name ?? "",
-          "avatar": account.avatarUrl ?? "",
-          "accessToken": account.accessToken ?? ""
+          "openId": userInfo?.openId ?? "",
+          "unionId": userInfo?.unionId ?? "",
+          "name": userInfo?.name ?? "",
+          "avatar": userInfo?.avatar ?? "",
+          "accessToken": accessToken
         ]
         result(accountInfo)
       } else {
@@ -108,20 +111,23 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
       let leaderboardId = args["leaderboardId"] as? String ?? ""
       let type = args["type"] as? String ?? "public"
       
-      guard let viewController = UIApplication.shared.keyWindow?.rootViewController else {
-        result(FlutterError(code: "VIEW_CONTROLLER_NOT_AVAILABLE", message: "View controller is not available", details: nil))
-        return
-      }
+      let collection: TapTapLeaderboardCollection = type == "friends" ? .friends : .public
       
-      TapTapLeaderboard.openLeaderboard(with: viewController, leaderboardId: leaderboardId, type: type)
+      TapTapLeaderboard.openLeaderboard(leaderboardId: leaderboardId, collection: collection)
       result(nil)
     case "registerLeaderboardCallback":
-      let callbackHandler = LeaderboardCallbackHandler(channel: self.channel)
-      TapTapLeaderboard.registerLeaderboardCallback(callback: callbackHandler)
+      leaderboardCallbackHandler = LeaderboardCallbackHandler(channel: self.channel)
+      TapTapLeaderboard.registerLeaderboardCallback(callback: leaderboardCallbackHandler!)
+      result(nil)
+    case "unregisterLeaderboardCallback":
+      if let handler = leaderboardCallbackHandler {
+        TapTapLeaderboard.unregisterLeaderboardCallback(callback: handler)
+        leaderboardCallbackHandler = nil
+      }
       result(nil)
     case "setLeaderboardShareCallback":
-      let shareHandler = ShareCallbackHandler(channel: self.channel)
-      TapTapLeaderboard.setShareCallback(callback: shareHandler)
+      shareCallbackHandler = ShareCallbackHandler(channel: self.channel)
+      TapTapLeaderboard.setShareCallback(callback: shareCallbackHandler!)
       result(nil)
     case "submitScores":
       guard let args = call.arguments as? [String: Any], let scoresData = args["scores"] as? [[String: Any]] else {
@@ -134,10 +140,10 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
         return
       }
       
-      var scoreItems: [ScoreItem] = []
+      var scoreItems: [TapTapLeaderboardScoreItem] = []
       for item in scoresData {
         if let leaderboardId = item["leaderboardId"] as? String, let score = item["score"] as? Int {
-          scoreItems.append(ScoreItem(leaderboardId: leaderboardId, score: score))
+          scoreItems.append(TapTapLeaderboardScoreItem(leaderboardId: leaderboardId, score: Int64(score)))
         }
       }
       
@@ -146,14 +152,8 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
         return
       }
       
-      TapTapLeaderboard.submitScores(scores: scoreItems) { response, error in
-        if let error = error {
-          let nsError = error as NSError
-          result(FlutterError(code: "SUBMIT_FAILED", message: nsError.localizedDescription, details: nsError.code))
-          return
-        }
-        result(["success": true])
-      }
+      let submitCallback = SubmitScoreCallbackHandler(result: result)
+      TapTapLeaderboard.submitScores(scores: scoreItems, callback: submitCallback)
     case "loadPlayerCenteredScores":
       guard let args = call.arguments as? [String: Any] else {
         result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
@@ -165,50 +165,16 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
       let periodToken = args["periodToken"] as? String ?? ""
       let maxCount = args["maxCount"] as? Int ?? 10
       
-      let collection: LeaderboardCollection = collectionStr == "FRIENDS" ? .friends : .public
+      let collection: TapTapLeaderboardCollection = collectionStr == "FRIENDS" ? .friends : .public
       
-      TapTapLeaderboard.loadPlayerCenteredScores(
+      let loadCallback = LoadScoresCallbackHandler(result: result)
+      TapTapLeaderboard.loadPlayerCenteredScoresObjC(
         leaderboardId: leaderboardId,
-        leaderboardCollection: collection,
+        collection: collection,
         periodToken: periodToken,
-        maxCount: maxCount
-      ) { response, error in
-        if let error = error {
-          let nsError = error as NSError
-          result(FlutterError(code: "LOAD_FAILED", message: nsError.localizedDescription, details: nsError.code))
-          return
-        }
-        
-        if let response = response {
-          let leaderboard = response.leaderboard
-          let leaderboardData: [String: Any] = [
-            "id": leaderboard?.id ?? "",
-            "name": leaderboard?.name ?? ""
-          ]
-          
-          let scoresList = response.scores?.map { score -> [String: Any] in
-            let user = score.user
-            let avatar = user?.avatar
-            return [
-              "rank": score.rank,
-              "rankDisplay": score.rankDisplay ?? "",
-              "score": score.score,
-              "scoreDisplay": score.scoreDisplay ?? "",
-              "playerId": user?.openid ?? "",
-              "playerName": user?.name ?? "",
-              "playerAvatar": avatar?.url ?? ""
-            ]
-          } ?? []
-          
-          result([
-            "leaderboard": leaderboardData,
-            "scores": scoresList
-          ])
-        } else {
-          result(["leaderboard": ["id": "", "name": ""], "scores": []])
-        }
-      }
-      
+        maxCount: NSNumber(value: maxCount),
+        callback: loadCallback
+      )
     case "loadLeaderboardScores":
       guard let args = call.arguments as? [String: Any] else {
         result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
@@ -218,66 +184,35 @@ public class FlutterTaptapPlugin: NSObject, FlutterPlugin {
       let leaderboardId = args["leaderboardId"] as? String ?? ""
       let collectionStr = args["leaderboardCollection"] as? String ?? "PUBLIC"
       let nextPage = args["nextPage"] as? String
+      let periodToken = args["periodToken"] as? String ?? ""
       
-      let collection: LeaderboardCollection = collectionStr == "FRIENDS" ? .friends : .public
+      let collection: TapTapLeaderboardCollection = collectionStr == "FRIENDS" ? .friends : .public
       
+      let loadCallback = LoadScoresCallbackHandler(result: result)
       TapTapLeaderboard.loadLeaderboardScores(
         leaderboardId: leaderboardId,
-        leaderboardCollection: collection,
-        nextPage: nextPage
-      ) { response, error in
-        if let error = error {
-          let nsError = error as NSError
-          result(FlutterError(code: "LOAD_FAILED", message: nsError.localizedDescription, details: nsError.code))
-          return
-        }
-        
-        if let response = response {
-          let leaderboard = response.leaderboard
-          let leaderboardData: [String: Any] = [
-            "id": leaderboard?.id ?? "",
-            "name": leaderboard?.name ?? ""
-          ]
-          
-          let scoresList = response.scores?.map { score -> [String: Any] in
-            let user = score.user
-            let avatar = user?.avatar
-            return [
-              "rank": score.rank,
-              "rankDisplay": score.rankDisplay ?? "",
-              "score": score.score,
-              "scoreDisplay": score.scoreDisplay ?? "",
-              "playerId": user?.openid ?? "",
-              "playerName": user?.name ?? "",
-              "playerAvatar": avatar?.url ?? ""
-            ]
-          } ?? []
-          
-          result([
-            "leaderboard": leaderboardData,
-            "scores": scoresList,
-            "nextPage": response.nextPage ?? ""
-          ])
-        } else {
-          result(["leaderboard": ["id": "", "name": ""], "scores": [], "nextPage": ""])
-        }
-      }
+        collection: collection,
+        nextPage: nextPage,
+        periodToken: periodToken,
+        callback: loadCallback
+      )
     case "registerComplianceCallback":
-      let handler = ComplianceCallbackHandler(channel: channel)
-      TapTapCompliance.registerComplianceCallback(handler)
+      complianceHandler = ComplianceCallbackHandler(channel: channel)
       result(nil)
     case "unregisterComplianceCallback":
-      TapTapCompliance.unregisterComplianceCallback()
+      complianceHandler = nil
       result(nil)
     case "startCompliance":
       guard let args = call.arguments as? [String: Any], let userId = args["userId"] as? String else {
         result(FlutterError(code: "INVALID_ARGUMENTS", message: "userId is required", details: nil))
         return
       }
-      TapTapCompliance.startup(userId: userId)
+      let token = TapTapLogin.getCurrentTapAccount()?.accessToken?.toJsonString() ?? ""
+      TapComplianceService.login(userId: userId, accessToken: token)
+      TapComplianceService.enterGame()
       result(nil)
     case "getRemainingTime":
-      let remainingTime = TapTapCompliance.getRemainingTime()
+      let remainingTime = TapComplianceService.currentUserRemainingTime()
       result(remainingTime)
     default:
       result(FlutterMethodNotImplemented)
@@ -311,11 +246,11 @@ class ShareCallbackHandler: NSObject, TapTapLeaderboardShareCallback {
   }
   
   func onShareFailed(error: Error) {
-    channel?.invokeMethod("onLeaderboardShareFailed", arguments: ["message": error.localizedDescription])
+    channel?.invokeMethod("onLeaderboardShareFailed", arguments: ["message": (error as NSError).localizedDescription])
   }
 }
 
-class ComplianceCallbackHandler: NSObject, TapTapComplianceCallback {
+class ComplianceCallbackHandler: NSObject, TapComplianceServiceCallback {
   private weak var channel: FlutterMethodChannel?
   
   init(channel: FlutterMethodChannel?) {
@@ -323,7 +258,75 @@ class ComplianceCallbackHandler: NSObject, TapTapComplianceCallback {
     super.init()
   }
   
-  func onComplianceResult(code: Int, extra: [String : Any]?) {
-    channel?.invokeMethod("onComplianceResult", arguments: ["code": code, "extra": extra ?? [:]])
+  func onCallback(code: Int, extra: String?) {
+    var extraDict: [String: Any] = [:]
+    if let extraStr = extra, let data = extraStr.data(using: .utf8) {
+      if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+        extraDict = json
+      }
+    }
+    channel?.invokeMethod("onComplianceResult", arguments: ["code": code, "extra": extraDict])
+  }
+}
+
+class SubmitScoreCallbackHandler: NSObject, TapTapLeaderboardResponseCallback {
+  private var result: FlutterResult
+  
+  init(result: @escaping FlutterResult) {
+    self.result = result
+    super.init()
+  }
+  
+  func onSuccess(data: Any) {
+    result(["success": true])
+  }
+  
+  func onFailure(code: Int, message: String) {
+    result(FlutterError(code: "SUBMIT_FAILED", message: message, details: code))
+  }
+}
+
+class LoadScoresCallbackHandler: NSObject, TapTapLeaderboardResponseCallback {
+  private var result: FlutterResult
+  
+  init(result: @escaping FlutterResult) {
+    self.result = result
+    super.init()
+  }
+  
+  func onSuccess(data: Any) {
+    if let response = data as? TapTapLeaderboardDataResponse {
+      let leaderboard = response.leaderboard
+      let leaderboardData: [String: Any] = [
+        "id": leaderboard?.id ?? "",
+        "name": leaderboard?.name ?? ""
+      ]
+      
+      let scoresList = response.scores?.map { score -> [String: Any] in
+        let user = score.user
+        let avatar = user?.avatar
+        return [
+          "rank": score.rank ?? 0,
+          "rankDisplay": score.rankDisplay ?? "",
+          "score": score.score ?? 0,
+          "scoreDisplay": score.scoreDisplay ?? "",
+          "playerId": user?.openId ?? "",
+          "playerName": user?.name ?? "",
+          "playerAvatar": avatar?.url ?? ""
+        ]
+      } ?? []
+      
+      result([
+        "leaderboard": leaderboardData,
+        "scores": scoresList,
+        "nextPage": response.nextPage
+      ])
+    } else {
+      result(["leaderboard": ["id": "", "name": ""], "scores": [], "nextPage": ""])
+    }
+  }
+  
+  func onFailure(code: Int, message: String) {
+    result(FlutterError(code: "LOAD_FAILED", message: message, details: code))
   }
 }

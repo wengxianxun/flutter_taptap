@@ -18,6 +18,7 @@ taptap服务插件
   s.dependency 'TapTapCoreSDK'
   s.dependency 'TapTapLoginSDK'
   s.dependency 'TapTapLeaderboardSDK'
+  s.dependency 'TapTapComplianceSDK'
   s.platform = :ios, '13.0'
 
   # Flutter.framework does not contain a i386 slice.

@@ -1,0 +1,62 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_taptap (0.0.1):
+    - Flutter
+    - TapTapComplianceSDK
+    - TapTapCoreSDK
+    - TapTapLeaderboardSDK
+    - TapTapLoginSDK
+  - integration_test (0.0.1):
+    - Flutter
+  - Kingfisher (6.3.1)
+  - TapTapComplianceSDK (4.8.3):
+    - TapTapLoginSDK (= 4.8.3)
+  - TapTapCoreSDK (4.8.3):
+    - TapTapGidSDK (= 4.8.3)
+  - TapTapGidSDK (4.8.3)
+  - TapTapLeaderboardSDK (4.8.3):
+    - TapTapProfileSDK (= 4.8.3)
+  - TapTapLoginSDK (4.8.3):
+    - TapTapCoreSDK (= 4.8.3)
+  - TapTapProfileSDK (4.8.3):
+    - Kingfisher (~> 6.0)
+    - TapTapLoginSDK (= 4.8.3)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_taptap (from `.symlinks/plugins/flutter_taptap/ios`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+
+SPEC REPOS:
+  trunk:
+    - Kingfisher
+    - TapTapComplianceSDK
+    - TapTapCoreSDK
+    - TapTapGidSDK
+    - TapTapLeaderboardSDK
+    - TapTapLoginSDK
+    - TapTapProfileSDK
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_taptap:
+    :path: ".symlinks/plugins/flutter_taptap/ios"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_taptap: 3bf18d9d97b9e4088ac91e9baf5ed7ce566cb904
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  Kingfisher: 016c8b653a35add51dd34a3aba36b580041acc74
+  TapTapComplianceSDK: 701d0e2dac4af9584b0b27242b5f91ebaf3f7a41
+  TapTapCoreSDK: eba318b0015c181e0b9d2f299ed617aaf27f8afd
+  TapTapGidSDK: a2221fe4141f88bb1b06464d114f0d76c5edc654
+  TapTapLeaderboardSDK: 993c705ebb1f4e236916ed0c0d823f8e6e676bd2
+  TapTapLoginSDK: b28cb9554fc1e71f85de597f381dbc1ab6c55241
+  TapTapProfileSDK: 457470fdb280ce752deb8c4e70bf98e5d027810e
+
+PODFILE CHECKSUM: 1b4e38c5a7977b1d2784dfb12c349b2547df92da
+
+COCOAPODS: 1.16.2
